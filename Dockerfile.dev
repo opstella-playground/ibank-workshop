@@ -1,0 +1,28 @@
+# Development Dockerfile with hot-reload support
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Install dependencies including dev dependencies
+COPY pyproject.toml uv.lock* ./
+RUN uv sync --frozen --all-groups --no-install-project
+
+# Copy application code
+COPY app ./app
+COPY tests ./tests
+
+# Create data directory for SQLite
+RUN mkdir -p /app/data
+
+# Set environment variables
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+
+# Expose port
+EXPOSE 8000
+
+# Run with hot-reload
+CMD ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]

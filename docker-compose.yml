@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastapi-todo-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=FastAPI Todo Starter
+      - DEBUG=false
+      - DATABASE_URL=sqlite:///./data/todos.db
+    volumes:
+      - todo-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  todo-data:
+    driver: local
