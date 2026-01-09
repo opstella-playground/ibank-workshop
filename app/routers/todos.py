@@ -1,10 +1,10 @@
 """Todo API router with CRUD operations."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import select
+from sqlmodel import desc, select
 
 from app.database import SessionDep
 from app.models.todo import Todo, TodoCreate, TodoPublic, TodoUpdate
@@ -37,7 +37,7 @@ def read_todos(
     if completed is not None:
         query = query.where(Todo.completed == completed)
 
-    query = query.offset(offset).limit(limit).order_by(Todo.created_at.desc())
+    query = query.offset(offset).limit(limit).order_by(desc(Todo.created_at))
     todos = session.exec(query).all()
     return list(todos)
 
@@ -60,7 +60,7 @@ def update_todo(todo_id: int, todo_update: TodoUpdate, session: SessionDep) -> T
 
     update_data = todo_update.model_dump(exclude_unset=True)
     if update_data:
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(UTC)
         db_todo.sqlmodel_update(update_data)
         session.add(db_todo)
         session.commit()
