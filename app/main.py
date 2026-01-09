@@ -5,10 +5,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.config import get_settings
 from app.database import create_db_and_tables
-from app.routers import todos_router
+from app.routers import health_router, todos_router
 
 settings = get_settings()
 
@@ -42,14 +43,10 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["root"])
-def root() -> dict[str, str]:
-    """Root endpoint returning API info."""
-    return {
-        "message": "Welcome to FastAPI Todo Starter",
-        "docs": "/docs",
-        "health": "/health",
-    }
+@app.get("/", tags=["root"], include_in_schema=False)
+def root() -> RedirectResponse:
+    """Root endpoint redirecting to API docs."""
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health", tags=["health"])
@@ -59,4 +56,5 @@ def health_check() -> dict[str, str]:
 
 
 # Include routers
+app.include_router(health_router, prefix=settings.api_prefix)
 app.include_router(todos_router, prefix=settings.api_prefix)

@@ -87,7 +87,7 @@ brew install uv
    ```
 
 4. **Open the API docs:**
-   - Swagger UI: http://127.0.0.1:8000/docs
+   - Swagger UI: http://127.0.0.1:8000/docs (or simple visit http://127.0.0.1:8000/)
    - ReDoc: http://127.0.0.1:8000/redoc
 
 ### Using Make Commands
@@ -167,6 +167,12 @@ make check  # Runs lint-fix, format, and typecheck
 ```
 
 ## API Endpoints
+
+### Health Check
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/health` | Check API service health |
 
 ### Todos CRUD
 

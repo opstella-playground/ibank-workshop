@@ -4,12 +4,10 @@ from fastapi.testclient import TestClient
 
 
 def test_read_root(client: TestClient):
-    """Test root endpoint."""
-    response = client.get("/")
-    assert response.status_code == 200
-    data = response.json()
-    assert "message" in data
-    assert data["docs"] == "/docs"
+    """Test root endpoint redirects to docs."""
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/docs"
 
 
 def test_health_check(client: TestClient):
