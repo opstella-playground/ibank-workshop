@@ -3,4 +3,6 @@ include:
     ref: "latest"
     file: "/pipelines/01-default-opstella/template.yml"
 variables:
-  SOURCE_CODE_PATH: "app"
+  SOURCE_CODE_PATH: "./app"
+  ACCEPTANCE_PATH: "/health"
+  OPSTELLA_DEVSECOPS_ENABLED: false
