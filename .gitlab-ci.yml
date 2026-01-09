@@ -4,4 +4,3 @@ include:
     file: "/pipelines/01-default-opstella/template.yml"
 variables:
   SOURCE_CODE_PATH: "app"
-  ACCEPTANCE_PATH: "/health"
