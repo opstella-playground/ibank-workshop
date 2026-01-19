@@ -54,17 +54,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     "action": "request_start",
                 },
             )
-        else:
-            logger.info(
-                f"Request started: {method} {path}",
-                extra={
-                    "request_id": request_id,
-                    "path": path,
-                    "method": method,
-                    "client_ip": client_host,
-                    "action": "request_start",
-                },
-            )
 
         # Process request and measure duration
         start_time = time.perf_counter()
@@ -121,11 +110,4 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 f"Request completed: {method} {path} -> {status_code} ({duration_ms:.2f}ms)",
                 extra=log_extra,
             )
-        else:
-            # Successful requests: INFO level
-            logger.info(
-                f"Request completed: {method} {path} -> {status_code} ({duration_ms:.2f}ms)",
-                extra=log_extra,
-            )
-
         return response

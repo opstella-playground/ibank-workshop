@@ -14,12 +14,25 @@ from app.config import get_settings
 from app.database import create_db_and_tables
 from app.logging_config import setup_logging
 from app.middleware import RequestLoggingMiddleware
-from app.routers import health_router, todos_router
+from app.routers import config_router, health_router, todos_router
+
+try:
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
+    OTEL_INSTRUMENTATION_AVAILABLE = True
+except ImportError:
+    OTEL_INSTRUMENTATION_AVAILABLE = False
 
 settings = get_settings()
 
 # Initialize logging before anything else
 logger = setup_logging()
+
+# Initialize Logging Instrumentation (captures standard logs)
+if OTEL_INSTRUMENTATION_AVAILABLE:
+    # LoggingInstrumentor().instrument(set_logging_packages=True)
+    pass
 
 
 @asynccontextmanager
@@ -29,7 +42,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
     # INFO: Application lifecycle events
     logger.info(
-        "Application starting up",
+        "🚀  Application starting up",
         extra={
             "action": "startup",
             "app_name": settings.app_name,
@@ -40,7 +53,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
     # DEBUG: Detailed technical information (only shown when DEBUG=true)
     logger.debug(
-        "Configuration loaded",
+        "⚙️ Configuration loaded",
         extra={
             "action": "config_load",
             "database_url": settings.database_url,
@@ -52,13 +65,13 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         create_db_and_tables()
         logger.info(
-            "Database tables created successfully",
+            "✅ Database tables created successfully",
             extra={"action": "db_init", "status": "success"},
         )
     except Exception as e:
         # ERROR: Something went wrong but app might still work
         logger.error(
-            f"Failed to create database tables: {e}",
+            f"❌ Failed to create database tables: {e}",
             extra={"action": "db_init", "status": "failed"},
             exc_info=True,
         )
@@ -66,7 +79,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
     # INFO: Startup complete
     logger.info(
-        "Application ready to receive requests",
+        "🔥 Application ready to receive requests",
         extra={"action": "startup_complete"},
     )
 
@@ -74,12 +87,12 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
     # === DEMO: Shutdown logging ===
     logger.info(
-        "Application shutting down",
+        "💀 Application shutting down",
         extra={"action": "shutdown"},
     )
     # Shutdown: Cleanup if needed
     logger.debug(
-        "Cleanup completed",
+        "🧹 Cleanup completed",
         extra={"action": "shutdown_complete"},
     )
 
@@ -93,6 +106,9 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+if OTEL_INSTRUMENTATION_AVAILABLE:
+    FastAPIInstrumentor.instrument_app(app)
 
 # Configure CORS
 app.add_middleware(
@@ -122,3 +138,4 @@ def health_check() -> dict[str, str]:
 # Include routers
 app.include_router(health_router, prefix=settings.api_prefix)
 app.include_router(todos_router, prefix=settings.api_prefix)
+app.include_router(config_router, prefix=settings.api_prefix)

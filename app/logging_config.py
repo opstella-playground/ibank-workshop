@@ -36,67 +36,70 @@ except ImportError:
     OTEL_AVAILABLE = False
 
 
-class StructuredFormatter(logging.Formatter):
-    """Custom formatter for structured JSON-like logging.
+class ColoredConsoleFormatter(logging.Formatter):
+    """Custom formatter for colorful, human-readable console output."""
 
-    Produces logs in a format that's easy to parse and works well with
-    log aggregation systems like Grafana Loki via OTLP.
-    """
+    # ANSI color codes
+    GREY = "\x1b[38;5;240m"
+    GREEN = "\x1b[32m"
+    YELLOW = "\x1b[33m"
+    RED = "\x1b[31m"
+    BOLD_RED = "\x1b[31;1m"
+    BLUE = "\x1b[34m"
+    CYAN = "\x1b[36m"
+    RESET = "\x1b[0m"
+
+    LEVEL_COLORS = {
+        logging.DEBUG: GREY,
+        logging.INFO: GREEN,
+        logging.WARNING: YELLOW,
+        logging.ERROR: RED,
+        logging.CRITICAL: BOLD_RED,
+    }
 
     def format(self, record: logging.LogRecord) -> str:
-        """Format the log record with structured data."""
-        # Add trace context if OpenTelemetry is available
-        trace_id = ""
-        span_id = ""
+        """Format the log record with colors and proper alignment."""
+        # 1. Timestamp (Grey)
+        timestamp = self.formatTime(record, "%H:%M:%S")
+        ts_str = f"{self.GREY}{timestamp}{self.RESET}"
 
+        # 2. Level (Colored)
+        color = self.LEVEL_COLORS.get(record.levelno, self.RESET)
+        level_str = f"{color}{record.levelname:<8}{self.RESET}"
+
+        # 3. Logger Name (Blue)
+        logger_name = f"{self.BLUE}{record.name:<15}{self.RESET}"
+
+        # 4. Message (White/Default)
+        message = record.getMessage()
+
+        # 5. Extract extra fields for context
+        extra_context = []
+        
+        # Add Trace ID if present and valid (subtle grey)
         if OTEL_AVAILABLE:
             span = trace.get_current_span()
             if span.is_recording():
                 ctx = span.get_span_context()
                 trace_id = format(ctx.trace_id, "032x")
-                span_id = format(ctx.span_id, "016x")
+                # specific short trace id for console
+                extra_context.append(f"{self.GREY}trace_id={trace_id[:7]}...{self.RESET}")
 
-        # Build the log message with structured context
-        log_data = {
-            "timestamp": self.formatTime(record, self.datefmt),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-            "line": record.lineno,
-        }
+        # Add specific relevant fields
+        std_attrs = set(logging.LogRecord("", 0, "", 0, "", (), None).__dict__.keys())
+        extra_keys = {k: v for k, v in record.__dict__.items() if k not in std_attrs and k != "message" and not k.startswith("_")}
+        
+        # Filter unwanted OTLP/internal keys if any
+        ignored_keys = {"action", "otelSpanID", "otelTraceID", "otelServiceName"}
+        
+        for k, v in extra_keys.items():
+            if k not in ignored_keys:
+                extra_context.append(f"{self.CYAN}{k}={v}{self.RESET}")
 
-        # Add trace context if available
-        if trace_id:
-            log_data["trace_id"] = trace_id
-            log_data["span_id"] = span_id
-
-        # Add exception info if present
-        if record.exc_info:
-            log_data["exception"] = self.formatException(record.exc_info)
-
-        # Add extra fields from the record
-        extra_keys = [
-            "request_id",
-            "user_id",
-            "path",
-            "method",
-            "status_code",
-            "duration_ms",
-            "todo_id",
-            "action",
-        ]
-        for key in extra_keys:
-            if hasattr(record, key):
-                log_data[key] = getattr(record, key)
-
-        # Format as structured log line
-        extra_str = " ".join(
-            f"{k}={v}" for k, v in log_data.items() if k not in ["message", "timestamp", "level", "logger"]
-        )
-
-        return f"{log_data['timestamp']} | {log_data['level']:8s} | {log_data['logger']} | {log_data['message']} | {extra_str}"
+        extra_str = " ".join(extra_context)
+        if extra_str:
+            return f"{ts_str} | {level_str} | {logger_name} | {message} | {extra_str}"
+        return f"{ts_str} | {level_str} | {logger_name} | {message}"
 
 
 def setup_logging(log_level: str | None = None) -> logging.Logger:
@@ -128,9 +131,7 @@ def setup_logging(log_level: str | None = None) -> logging.Logger:
     # Console handler with structured formatting
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
-    console_handler.setFormatter(
-        StructuredFormatter(datefmt="%Y-%m-%dT%H:%M:%S%z")
-    )
+    console_handler.setFormatter(ColoredConsoleFormatter())
     logger.addHandler(console_handler)
 
     # Setup OpenTelemetry logging if available and configured
@@ -154,7 +155,7 @@ def setup_logging(log_level: str | None = None) -> logging.Logger:
             logger.addHandler(otel_handler)
 
             logger.info(
-                "OpenTelemetry logging initialized",
+                "✅ OpenTelemetry logging initialized",
                 extra={"action": "otel_init", "status": "success"},
             )
         except Exception as e:
