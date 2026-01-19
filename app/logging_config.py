@@ -13,6 +13,16 @@ from typing import Any
 
 from app.config import get_settings
 
+# Suppress noisy gRPC and OpenTelemetry exporter warnings
+# These are especially noisy when OTLP endpoint is unavailable (e.g., local dev)
+for noisy_logger in [
+    "opentelemetry.sdk._logs._internal.export",
+    "opentelemetry.sdk._logs.export",
+    "opentelemetry.exporter.otlp.proto.grpc.exporter",
+    "grpc._channel",
+]:
+    logging.getLogger(noisy_logger).setLevel(logging.ERROR)
+
 # Try to import OpenTelemetry for trace correlation
 try:
     from opentelemetry import trace
