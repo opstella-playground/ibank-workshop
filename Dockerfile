@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# check=error=true
+
 # Build stage
 FROM python:3.12-slim AS builder
 

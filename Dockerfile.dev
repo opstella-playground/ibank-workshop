@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# check=error=true
+
 # Development Dockerfile with hot-reload support
 FROM python:3.12-slim
 

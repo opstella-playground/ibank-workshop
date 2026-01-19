@@ -8,6 +8,8 @@ A production-ready FastAPI starter kit with a sample Todo CRUD API, SQLite datab
 - 📦 **SQLModel** - SQL databases with Pydantic models
 - 🗄️ **SQLite** - Lightweight, file-based database
 - 🐳 **Docker** - Containerized for development and production
+- 🔭 **Observability** - OpenTelemetry (OTLP) logging & tracing support
+- 📝 **Structured Logging** - JSON-formatted logs with request context
 - ✅ **Testing** - Pytest with test fixtures
 - 🔧 **Configuration** - Environment-based settings with Pydantic
 - 📚 **API Documentation** - Auto-generated OpenAPI/Swagger docs
@@ -27,11 +29,14 @@ fastapi/
 │   ├── main.py           # FastAPI application
 │   ├── config.py         # Configuration settings
 │   ├── database.py       # Database setup
+│   ├── logging_config.py # OpenTelemetry logging setup
+│   ├── middleware.py     # Request logging middleware
 │   ├── models/
 │   │   ├── __init__.py
 │   │   └── todo.py       # Todo models
 │   └── routers/
 │       ├── __init__.py
+│       ├── config.py     # Config debug endpoint
 │       └── todos.py      # Todo API routes
 ├── tests/
 │   ├── __init__.py
@@ -49,7 +54,18 @@ fastapi/
 └── README.md
 ```
 
+## Observability & Logging
+
+This starter kit includes built-in support for **OpenTelemetry (OTLP)**.
+
+- **Structured Logging**: Logs are formatted as JSON (or colored console in dev) with trace IDs, span IDs, and request context.
+- **Request Logging**: Middleware automatically logs all requests with duration, status codes, and request IDs.
+- **Trace Correlation**: Logs are automatically correlated with distributed traces if a collector is connected.
+
+To enable OTLP export, configure the relevant environment variables (see below).
+
 ## Quick Start
+
 
 ### Prerequisites
 
@@ -174,6 +190,12 @@ make check  # Runs lint-fix, format, and typecheck
 |--------|----------|-------------|
 | `GET` | `/api/v1/health` | Check API service health |
 
+### Debug Configuration
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/config` | View current config & env vars (DEBUG only) |
+
 ### Todos CRUD
 
 | Method | Endpoint | Description |
@@ -242,8 +264,12 @@ Environment variables (see `.env.example`):
 | `APP_NAME` | Application name | FastAPI Todo Starter |
 | `APP_VERSION` | Application version | 0.1.0 |
 | `DEBUG` | Enable debug mode | false |
+| `LOG_LEVEL` | Minimum log level (DEBUG, INFO, ...) | INFO |
 | `DATABASE_URL` | SQLite database path | sqlite:///./data/todos.db |
 | `API_PREFIX` | API route prefix | /api/v1 |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP Collector Endpoint | localhost:4317 |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP Protocol (grpc/http/protobuf) | grpc |
+| `OTEL_RESOURCE_ATTRIBUTES` | Resource attributes for traces/logs | service.name=... |
 
 ## Adding Dependencies
 
