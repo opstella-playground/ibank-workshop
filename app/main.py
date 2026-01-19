@@ -1,4 +1,7 @@
-"""FastAPI Todo Starter Application."""
+"""FastAPI Todo Starter Application.
+
+This application demonstrates logging best practices with OpenTelemetry OTLP support.
+"""
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -9,18 +12,76 @@ from fastapi.responses import RedirectResponse
 
 from app.config import get_settings
 from app.database import create_db_and_tables
+from app.logging_config import setup_logging
+from app.middleware import RequestLoggingMiddleware
 from app.routers import health_router, todos_router
 
 settings = get_settings()
+
+# Initialize logging before anything else
+logger = setup_logging()
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler for startup and shutdown events."""
+    # === DEMO: Different log levels for startup ===
+
+    # INFO: Application lifecycle events
+    logger.info(
+        "Application starting up",
+        extra={
+            "action": "startup",
+            "app_name": settings.app_name,
+            "app_version": settings.app_version,
+            "debug_mode": settings.debug,
+        },
+    )
+
+    # DEBUG: Detailed technical information (only shown when DEBUG=true)
+    logger.debug(
+        "Configuration loaded",
+        extra={
+            "action": "config_load",
+            "database_url": settings.database_url,
+            "api_prefix": settings.api_prefix,
+        },
+    )
+
     # Startup: Create database tables
-    create_db_and_tables()
+    try:
+        create_db_and_tables()
+        logger.info(
+            "Database tables created successfully",
+            extra={"action": "db_init", "status": "success"},
+        )
+    except Exception as e:
+        # ERROR: Something went wrong but app might still work
+        logger.error(
+            f"Failed to create database tables: {e}",
+            extra={"action": "db_init", "status": "failed"},
+            exc_info=True,
+        )
+        raise
+
+    # INFO: Startup complete
+    logger.info(
+        "Application ready to receive requests",
+        extra={"action": "startup_complete"},
+    )
+
     yield
+
+    # === DEMO: Shutdown logging ===
+    logger.info(
+        "Application shutting down",
+        extra={"action": "shutdown"},
+    )
     # Shutdown: Cleanup if needed
+    logger.debug(
+        "Cleanup completed",
+        extra={"action": "shutdown_complete"},
+    )
 
 
 app = FastAPI(
@@ -41,6 +102,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add request logging middleware (added after CORS so it runs first)
+app.add_middleware(RequestLoggingMiddleware)
 
 
 @app.get("/", tags=["root"], include_in_schema=False)

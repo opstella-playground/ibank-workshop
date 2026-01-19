@@ -13,6 +13,10 @@ dependencies = [
     "sqlmodel>=0.0.22",
     "uvicorn[standard]>=0.32.0",
     "pydantic-settings>=2.6.0",
+    # OpenTelemetry for OTLP logging
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
 ]
 
 [dependency-groups]
