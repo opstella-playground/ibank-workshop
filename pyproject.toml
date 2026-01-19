@@ -5,9 +5,7 @@ description = "FastAPI Starter Kit with Todo CRUD API"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-authors = [
-    { name = "Your Name", email = "your.email@example.com" }
-]
+authors = [{ name = "Your Name", email = "your.email@example.com" }]
 dependencies = [
     "fastapi[standard]>=0.115.0",
     "sqlmodel>=0.0.22",
@@ -17,6 +15,8 @@ dependencies = [
     "opentelemetry-api>=1.28.0",
     "opentelemetry-sdk>=1.28.0",
     "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
+    # Pin grpcio to avoid OTLP connection bug (issue #4517)
+    "grpcio<1.68.0",
 ]
 
 [dependency-groups]
@@ -45,30 +45,24 @@ packages = ["app"]
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-exclude = [
-    ".git",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "*.pyc",
-]
+exclude = [".git", ".ruff_cache", ".venv", "__pycache__", "*.pyc"]
 
 [tool.ruff.lint]
 select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # Pyflakes
-    "I",      # isort
-    "UP",     # pyupgrade
-    "B",      # flake8-bugbear
-    "C4",     # flake8-comprehensions
-    "SIM",    # flake8-simplify
-    "ARG",    # flake8-unused-arguments
-    "PTH",    # flake8-use-pathlib
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
 ]
 ignore = [
-    "E501",   # line too long (handled by formatter)
-    "B008",   # do not perform function calls in argument defaults (FastAPI Depends)
+    "E501", # line too long (handled by formatter)
+    "B008", # do not perform function calls in argument defaults (FastAPI Depends)
 ]
 
 [tool.ruff.lint.isort]
