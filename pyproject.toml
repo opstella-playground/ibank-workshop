@@ -11,12 +11,12 @@ dependencies = [
     "sqlmodel>=0.0.22",
     "uvicorn[standard]>=0.32.0",
     "pydantic-settings>=2.6.0",
-    # OpenTelemetry for OTLP logging
+    # OpenTelemetry
     "opentelemetry-api>=1.28.0",
     "opentelemetry-sdk>=1.28.0",
-    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
-    # Pin grpcio to avoid OTLP connection bug (issue #4517)
-    "grpcio<1.68.0",
+    "opentelemetry-exporter-otlp>=1.28.0",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+    "opentelemetry-instrumentation-logging>=0.46b0",
 ]
 
 [dependency-groups]

@@ -8,13 +8,6 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      # Overrides or container-specific settings
-      - DATABASE_URL=sqlite:///./data/todos.db
-      # Fix OTLP endpoint for Docker on Mac/Windows (localhost -> host.docker.internal)
-      # ERROR FIX: Removing http:// prefix and enforcing insecure mode for local gRPC
-      - OTEL_EXPORTER_OTLP_ENDPOINT=host.docker.internal:4317
-      - OTEL_EXPORTER_OTLP_INSECURE=true
     volumes:
       - ./app:/app/app:cached
       - ./data:/app/data
