@@ -1,6 +1,6 @@
 include:
   - project: "opstella-cicd/pipeline-template"
-    ref: "develop"
+    ref: "main"
     file: "/pipelines/01-default-opstella/template.yml"
 variables:
   SOURCE_CODE_PATH: "app"
