@@ -3,6 +3,8 @@ include:
     ref: "main"
     file: "/pipelines/01-default-opstella/template.yml"
 variables:
+  ACCEPTANCE_PATH: "/health"
   SOURCE_CODE_PATH: "app"
   SONARQUBE_SCANNER_ENFORCE_SECURITY_GATE: "false"
+  # ENABLE_ACCEPTANCE_TEST: false
   # OPSTELLA_DEVSECOPS_ENABLED: false
