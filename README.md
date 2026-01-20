@@ -121,10 +121,10 @@ make check       # Run all linters (lint + format + typecheck)
 The project uses a separated base image (`Dockerfile.base`) to speed up builds and ensure consistency.
 
 ```bash
-# Build the base image
+# Build the base image (targeting AMD64 for CI compatibility)
 make docker-base
 # Or directly:
-docker build -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
+docker build --platform linux/amd64 -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
 ```
 
 ### Docker Development

@@ -79,7 +79,7 @@ test-cov:
 # ============================================================================
 
 docker-base:
-	docker build -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
+	docker build --platform linux/amd64 -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
 
 docker-dev: docker-base
 	docker compose -f docker-compose.dev.yml up --build
