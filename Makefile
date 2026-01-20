@@ -21,6 +21,7 @@ help:
 	@echo "  make test-cov    - Run tests with coverage"
 	@echo ""
 	@echo "Docker:"
+	@echo "  make docker-base - Build base Docker image"
 	@echo "  make docker-dev  - Run with Docker (development)"
 	@echo "  make docker-prod - Run with Docker (production)"
 	@echo ""
@@ -77,10 +78,13 @@ test-cov:
 # Docker
 # ============================================================================
 
-docker-dev:
+docker-base:
+	docker build -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
+
+docker-dev: docker-base
 	docker compose -f docker-compose.dev.yml up --build
 
-docker-prod:
+docker-prod: docker-base
 	docker compose up --build -d
 
 docker-down:

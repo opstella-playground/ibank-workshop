@@ -116,6 +116,17 @@ make test        # Run tests
 make check       # Run all linters (lint + format + typecheck)
 ```
 
+### Base Image
+
+The project uses a separated base image (`Dockerfile.base`) to speed up builds and ensure consistency.
+
+```bash
+# Build the base image
+make docker-base
+# Or directly:
+docker build -t registry.orion.opstella.in.th/shared/python3-with-uv:latest -f Dockerfile.base .
+```
+
 ### Docker Development
 
 ```bash
