@@ -2,6 +2,7 @@
 # check=error=true
 
 ARG BASE_IMAGE=registry.orion.opstella.in.th/shared/python3-with-uv:latest
+# [HARBOR_REGISTRY_URL]/ibank-ops/base-images/python3-with-uv:latest
 
 # Build stage
 FROM ${BASE_IMAGE} AS builder
