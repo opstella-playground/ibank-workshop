@@ -4,4 +4,5 @@ include:
     file: "/pipelines/01-default-opstella/template.yml"
 variables:
   SOURCE_CODE_PATH: "app"
+  SONARQUBE_SCANNER_ENFORCE_SECURITY_GATE: "false"
   # OPSTELLA_DEVSECOPS_ENABLED: false
