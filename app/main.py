@@ -17,9 +17,25 @@ from app.middleware import RequestLoggingMiddleware
 from app.routers import config_router, health_router, todos_router
 
 try:
+    from opentelemetry import trace
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
     from opentelemetry.instrumentation.logging import LoggingInstrumentor
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk.resources import Resource
 
+    # Initialize OpenTelemetry Tracing
+    # Resource.create() automatically reads OTEL_RESOURCE_ATTRIBUTES env var
+    # Default: service.name=ops-opstella-demo-todo-dev
+    resource = Resource.create()
+    tracer_provider = TracerProvider(resource=resource)
+    tracer_provider.add_span_processor(
+        BatchSpanProcessor(OTLPSpanExporter())
+    )
+    # Register the tracer provider globally
+    trace.set_tracer_provider(tracer_provider)
+    
     OTEL_INSTRUMENTATION_AVAILABLE = True
 except ImportError:
     OTEL_INSTRUMENTATION_AVAILABLE = False
@@ -31,7 +47,7 @@ logger = setup_logging()
 
 # Initialize Logging Instrumentation (captures standard logs)
 if OTEL_INSTRUMENTATION_AVAILABLE:
-    # LoggingInstrumentor().instrument(set_logging_packages=True)
+    LoggingInstrumentor().instrument(set_logging_packages=True)
     pass
 
 
