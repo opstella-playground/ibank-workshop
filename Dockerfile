@@ -1,17 +1,22 @@
 # syntax=docker/dockerfile:1
 # check=error=true
+FROM python:3.12-slim AS builder
 
-ARG BASE_IMAGE=registry.orion.opstella.in.th/shared/python3-with-uv:latest
+WORKDIR /app
 
-# Build stage
-FROM ${BASE_IMAGE} AS builder
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Install dependencies
 COPY pyproject.toml uv.lock* ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # Production stage
-FROM ${BASE_IMAGE} AS production
+FROM python:3.12-slim AS production
 
 # Create non-root user for security
 RUN groupadd --gid 1000 appgroup && \
