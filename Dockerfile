@@ -17,7 +17,7 @@ ENV UV_HTTP_TIMEOUT=120
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
-    # Production stage
+# Production stage
 FROM python:3.12-slim AS production
 
 ENV PATH="/app/.venv/bin:$PATH"
