@@ -25,6 +25,8 @@ ENV PATH="/app/.venv/bin:$PATH"
 RUN groupadd --gid 1000 appgroup && \
     useradd --uid 1000 --gid appgroup --shell /bin/bash --create-home appuser
 
+WORKDIR /app
+
 COPY --from=builder /app/.venv /app/.venv
 COPY app ./app
 
